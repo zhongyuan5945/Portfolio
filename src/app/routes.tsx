@@ -21,6 +21,10 @@ export const router = createBrowserRouter([
       { path: 'work/arts-visuels/photo', Component: PhotoSeries },
       { path: 'project/:id', Component: ProjectDetail },
       { path: 'video-references', Component: VideoReferences },
+      {
+        path: 'video-references/:id',
+        lazy: async () => ({ Component: (await import('./pages/VideoProjectDetail')).VideoProjectDetail })
+      },
       { path: 'about', Component: About },
       { path: 'contact', Component: Contact },
       { path: '*', Component: NotFound },

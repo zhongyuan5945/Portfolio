@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Designer Portfolio</title>
+    <script>
+      // GitHub Pages has no history fallback. Carry the complete original URL
+      // to the root document, where index.html restores it before React starts.
+      var target = location.pathname + location.search + location.hash;
+      location.replace('/?__portfolio_route=' + encodeURIComponent(target));
+    </script>
+  </head>
+  <body><a href="/">ZHONG Yuan</a></body>
+</html>

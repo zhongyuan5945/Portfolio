@@ -1,11 +1,12 @@
 import { useParams, Link } from 'react-router';
 import { useMemo } from 'react';
-import { projects, Category, getProjectsByCategory, getPhotoSeries } from '../data/projects';
-import { projectImageUrls, dessinSubcategoryImages } from '../data/projectImageData';
+import { Category, getProjectsByCategory, getPhotoSeries } from '../data/projects';
+import { projectImageUrls } from '../data/projectImageData';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../i18n/translations';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { ArrowLeft } from 'lucide-react';
+import { getProjectThumbnail } from '../data/portfolio';
 
 export function CategoryWork() {
   const { category } = useParams<{ category: string }>();
@@ -21,12 +22,6 @@ export function CategoryWork() {
     if (imgs.length === 0) return undefined;
     return imgs[Math.floor(Math.random() * imgs.length)];
   }, [photoSeries]);
-  
-  const dessinTileImage = useMemo(() => {
-    const dessinImages = Object.values(dessinSubcategoryImages).flat().filter(Boolean);
-    if (dessinImages.length === 0) return undefined;
-    return dessinImages[Math.floor(Math.random() * dessinImages.length)];
-  }, []);
   
   const hasPhotoSubcategory = categoryKey === 'arts-visuels';
 
@@ -121,8 +116,10 @@ export function CategoryWork() {
                   }`}
                 >
                   <ImageWithFallback
-                    src={project.id === 'dessin' ? (dessinTileImage || project.coverImage) : project.coverImage}
+                    src={getProjectThumbnail(project)}
                     alt={project.title}
+                    loading="lazy"
+                    decoding="async"
                     className={`w-full h-full object-cover transition-all duration-500 ${
                       categoryKey === 'univers-ludiques'
                         ? 'group-hover:scale-150'

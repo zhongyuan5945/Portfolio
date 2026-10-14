@@ -1,48 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { getPhotoSeries, getProjectImages, getProjectImagePlaceholders } from '../data/projects';
+import { getPhotoSeries, getProjectImages, getProjectImagePlaceholders, getProjectVideos } from '../data/projects';
+import { getThumbnailUrl } from '../data/media';
+import { VideoPlayer } from '../components/VideoPlayer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../i18n/translations';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { ArrowLeft, X } from 'lucide-react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
-
-function getThumbnailUrl(url: string): string {
-  try {
-    const parsedUrl = new URL(url);
-    const domain = parsedUrl.hostname;
-
-    if (domain.includes('imagekit.io')) {
-      const separator = url.includes('?') ? '&' : '?';
-      return `${url}${separator}tr=w-300,q-70`;
-    }
-
-    if (domain.includes('images.unsplash.com') || domain.includes('images.pexels.com')) {
-      const params = parsedUrl.searchParams;
-      const width = Number(params.get('w')) || 0;
-      if (width > 2000) {
-        params.set('w', `${Math.max(300, Math.round(width * 0.2))}`);
-      } else {
-        params.set('w', '300');
-      }
-      if (!params.has('auto')) params.set('auto', 'format');
-      return parsedUrl.toString();
-    }
-
-    if (parsedUrl.searchParams.has('w')) {
-      const width = Number(parsedUrl.searchParams.get('w'));
-      if (!Number.isNaN(width) && width > 2000) {
-        parsedUrl.searchParams.set('w', `${Math.max(300, Math.round(width * 0.2))}`);
-        return parsedUrl.toString();
-      }
-    }
-
-    return url;
-  } catch {
-    return url;
-  }
-}
 
 export function PhotoSeries() {
   const { language } = useLanguage();
@@ -68,7 +34,7 @@ export function PhotoSeries() {
   );
 
   const thumbnailUrls = useMemo(
-    () => selectedImages.map(getThumbnailUrl),
+    () => selectedImages.map((url) => getThumbnailUrl(url, 300)),
     [selectedImages]
   );
 
@@ -218,8 +184,8 @@ export function PhotoSeries() {
                         </button>
                       ))}
                     </div>
-                    {series.videoUrl ? (
-                      <div className="space-y-4 rounded-[1.5rem] border border-black/10 bg-white p-4 md:p-6">
+                    {getProjectVideos(series).map((video) => (
+                      <div key={video.src} className="space-y-4 rounded-[1.5rem] border border-black/10 bg-white p-4 md:p-6">
                         <p className="text-sm font-medium text-black/70">
                           {language === 'fr'
                             ? 'Vidéo du projet'
@@ -227,19 +193,9 @@ export function PhotoSeries() {
                             ? 'Project video'
                             : '项目视频'}
                         </p>
-                        <div className="aspect-video w-full overflow-hidden rounded-3xl bg-black">
-                          <iframe
-                            src={series.videoUrl}
-                            title="Cube Pixel video"
-                            className="h-full w-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerPolicy="strict-origin-when-cross-origin"
-                            allowFullScreen
-                            loading="lazy"
-                          />
-                        </div>
+                        <VideoPlayer video={video} title={series.title} />
                       </div>
-                    ) : null}
+                    ))}
                   </div>
                 ) : null
               ];

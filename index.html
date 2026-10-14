@@ -4,7 +4,22 @@
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="icon" href="%BASE_URL%favicon.ico" sizes="16x16 32x32 48x48" type="image/x-icon" />
+      <link rel="icon" href="%BASE_URL%favicon-32x32.png" sizes="32x32" type="image/png" />
+      <link rel="icon" href="%BASE_URL%favicon-192x192.png" sizes="192x192" type="image/png" />
+      <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" sizes="180x180" />
       <title>Designer Portfolio</title>
+      <script>
+        (function () {
+          var params = new URLSearchParams(location.search);
+          var target = params.get('__portfolio_route');
+          if (!target) return;
+          var url = new URL(target, location.origin);
+          if (target.charAt(0) === '/' && url.origin === location.origin && !url.searchParams.has('__portfolio_route')) {
+            history.replaceState(null, '', url.pathname + url.search + url.hash);
+          }
+        })();
+      </script>
       <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
     </head>
 
@@ -13,4 +28,3 @@
       <script type="module" src="/src/main.tsx"></script>
     </body>
   </html>
-  

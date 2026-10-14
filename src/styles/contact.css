@@ -1,0 +1,72 @@
+/* Contact-only Editorial layout: the homepage, navigation and fonts retain
+   their own styles. Spacing and rules follow the homepage work archive. */
+.contact-page {
+  min-height: 100vh;
+  background: #fff;
+  color: #171717;
+  padding: 9rem 1.5rem 5rem;
+  --contact-gap: clamp(1.25rem, 2.4vw, 2.5rem);
+}
+.contact-page .contact-content { max-width: 1600px; margin-inline: auto; }
+.contact-page .contact-masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-bottom: 1px solid #222;
+  padding-bottom: 1rem;
+  margin-bottom: clamp(2rem, 4vw, 4rem);
+}
+.contact-page .contact-masthead-icon { flex-shrink: 0; align-self: center; color: #666; }
+.contact-page .contact-availability { max-width: 24rem; font-size: .75rem; line-height: 1.6; color: #666; text-align: right; }
+.contact-page .contact-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem var(--contact-gap);
+  align-items: end;
+  margin-bottom: clamp(3rem, 6vw, 6rem);
+}
+.contact-page .contact-title { min-width: 0; font-size: clamp(2.6rem, 6.5vw, 6rem); line-height: 1.1; letter-spacing: -.045em; font-weight: 400; overflow-wrap: anywhere; }
+.contact-page .contact-introduction { max-width: 28rem; font-size: clamp(1rem, 1.5vw, 1.3rem); line-height: 1.65; color: #424242; }
+.contact-page .contact-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(2.5rem, 5vw, 5rem) var(--contact-gap); }
+.contact-page .contact-block { min-width: 0; border-top: 1px solid #b8b8b8; padding-top: 1rem; }
+.contact-page .contact-block-label { display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1.5rem; }
+.contact-page .contact-block-number { color: #737373; font-size: .65rem; font-variant-numeric: tabular-nums; }
+.contact-page .contact-block-label h2 { font-family: inherit; font-size: .75rem; font-weight: 400; line-height: 1.5; letter-spacing: .025em; text-transform: uppercase; }
+.contact-page .contact-link { display: inline-flex; align-items: baseline; gap: 1rem; max-width: 100%; min-height: 48px; padding-block: .5rem; cursor: pointer; }
+.contact-page .contact-link-value { min-width: 0; overflow-wrap: anywhere; line-height: 1.4; }
+.contact-page .contact-email-link { font-size: clamp(1rem, 2.65vw, 2.65rem); letter-spacing: -.035em; }
+.contact-page .contact-phone-link { font-size: clamp(1rem, 1.6vw, 1.4rem); letter-spacing: -.025em; }
+.contact-page .contact-link-arrow { align-self: center; flex-shrink: 0; transition: transform 250ms ease; }
+.contact-page .contact-link:hover .contact-link-value,
+.contact-page .contact-link:focus-visible .contact-link-value { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.contact-page .contact-link:hover .contact-link-arrow { transform: translate(2px, -2px); }
+.contact-page .contact-link:focus-visible { outline: 2px solid #171717; outline-offset: 6px; }
+.contact-page .contact-social-links { display: grid; max-width: 30rem; gap: .5rem; }
+.contact-page .contact-social-link { display: flex; justify-content: space-between; font-size: 1.1rem; border-bottom: 1px solid #e0e0e0; }
+.contact-page .contact-address { font-style: normal; font-size: .95rem; line-height: 1.75; color: #424242; overflow-wrap: anywhere; }
+.contact-page .contact-address p + p { margin-top: .5rem; }
+.contact-page .contact-business { margin-top: 1.5rem; font-size: .7rem; line-height: 1.6; color: #666; }
+.contact-page .contact-business > div { display: flex; flex-wrap: wrap; gap: .5rem 1rem; }
+.contact-page .contact-business dd { font-variant-numeric: tabular-nums; }
+
+@media (min-width: 640px) {
+  .contact-page { padding-inline: 2rem; }
+  .contact-page .contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .contact-page .contact-block-email,
+  .contact-page .contact-block-phone { grid-column: span 2; }
+}
+@media (min-width: 1024px) {
+  .contact-page { padding: 10rem 3rem 7rem; }
+  .contact-page .contact-header,
+  .contact-page .contact-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .contact-page .contact-title,
+  .contact-page .contact-introduction { grid-column: span 2; }
+  .contact-page .contact-block-email { grid-column: span 3; }
+  .contact-page .contact-block-phone { grid-column: span 1; }
+  .contact-page .contact-block-social,
+  .contact-page .contact-block-location { grid-column: span 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-page .contact-link-arrow { transform: none !important; transition: none !important; }
+}

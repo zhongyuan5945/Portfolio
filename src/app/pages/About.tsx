@@ -1,5 +1,7 @@
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../i18n/translations';
+import { Download } from 'lucide-react';
+import { resumeDownload, resumeExperienceGroups } from '../data/resume';
 
 export function About() {
   const { language } = useLanguage();
@@ -15,6 +17,8 @@ export function About() {
       'Figma',
       'Unity',
       'Blender',
+      'Toon Boom Harmony',
+      'Clip Studio Paint',
       'Aseprite',
       'Calligraphie chinoise',
       'Peinture chinoise'
@@ -29,6 +33,8 @@ export function About() {
       'Figma',
       'Unity',
       'Blender',
+      'Toon Boom Harmony',
+      'Clip Studio Paint',
       'Aseprite',
       'Chinese Calligraphy',
       'Chinese Painting'
@@ -43,67 +49,30 @@ export function About() {
       'Figma',
       'Unity',
       'Blender',
+      'Toon Boom Harmony',
+      'Clip Studio Paint',
       'Aseprite',
       '中国书法',
       '中国绘画'
     ]
   };
 
-const experience = {
-    fr: [
-      { role: 'Graphiste print freelance', company: 'Bonprint (CX Design)', period: '11/2024 – 2026', location: 'Paris' },
-      { role: 'Création visuelle / Montage vidéo', company: 'LuckyTime', period: '03/2022 – 04/2024', location: 'Paris' },
-      { role: 'Illustrateur / Graphiste', company: 'Debond', period: '06/2022 – 12/2022', location: 'Paris' },
-      { role: 'Graphiste branding freelance', company: 'Royalties Ecobranding', period: '09/2021 – 12/2021', location: 'Paris' },
-      { role: 'Montage Vidéo (Stage)', company: 'LuckyTime', period: '08/2020 – 01/2021', location: 'Paris' },
-      { role: 'Médiateur culturel (Volontaire)', company: 'Art#Connexion (Grand Palais)', period: '06/07/2018 – 09/07/2018', location: 'Paris' },
-      { role: 'Web Designer (Stage)', company: 'Galerie Pascal Vanhoecke', period: '04/2018 – 06/2018', location: 'Cachan, Paris' },
-      { role: 'Print (Stage)', company: 'LEYING Culturelle et Créative', period: '03/2016 – 06/2016', location: 'Yuhang, Hangzhou' },
-      { role: 'Médiateur culturel (Volontaire)', company: 'Musée d\'Art du Zhejiang', period: '06/2015 – 06/2016', location: 'Hangzhou' },
-      { role: 'Graphiste (Stage)', company: 'ZHIRUI Médias', period: '12/2015 – 03/2016', location: 'Hangzhou' }
-    ],
-    en: [
-      { role: 'Freelance Print Graphic Designer', company: 'Bonprint (CX Design)', period: '11/2024 – 05/2026', location: 'Paris' },
-      { role: 'Visual Creation / Video Editing', company: 'LuckyTime', period: '03/2022 – 04/2024', location: 'Paris' },
-      { role: 'Illustrator / Graphic Designer', company: 'Debond', period: '06/2022 – 12/2022', location: 'Paris' },
-      { role: 'Freelance Branding Graphic Designer', company: 'Royalties Ecobranding', period: '09/2021 – 12/2021', location: 'Paris' },
-      { role: 'Video Editing (Internship)', company: 'LuckyTime', period: '08/2020 – 01/2021', location: 'Paris' },
-      { role: 'Cultural Mediator (Volunteer)', company: 'Art#Connexion (Grand Palais)', period: '06/07/2018 – 09/07/2018', location: 'Paris' },
-      { role: 'Web Designer (Internship)', company: 'Galerie Pascal Vanhoecke', period: '04/2018 – 06/2018', location: 'Cachan, Paris' },
-      { role: 'Print Designer (Internship)', company: 'LEYING Cultural & Creative', period: '03/2016 – 06/2016', location: 'Yuhang, Hangzhou' },
-      { role: 'Cultural Mediator (Volunteer)', company: 'Zhejiang Art Museum', period: '06/2015 – 06/2016', location: 'Hangzhou' },
-      { role: 'Graphic Designer (Internship)', company: 'ZHIRUI Media', period: '12/2015 – 03/2016', location: 'Hangzhou' }
-    ],
-    zh: [
-      { role: '自由平面设计师（印刷）', company: 'Bonprint (CX Design)', period: '11/2024 – 2026', location: '巴黎' },
-      { role: '视觉创作 / 视频编辑', company: 'LuckyTime', period: '03/2022 – 04/2024', location: '巴黎' },
-      { role: '插画师 / 平面设计师', company: 'Debond', period: '06/2022 – 12/2022', location: '巴黎' },
-      { role: '自由品牌平面设计师', company: 'Royalties Ecobranding', period: '09/2021 – 12/2021', location: '巴黎' },
-      { role: '视频剪辑（实习）', company: 'LuckyTime', period: '08/2020 – 01/2021', location: '巴黎' },
-      { role: '文化调解员（志愿者）', company: 'Art#Connexion (巴黎大皇宫)', period: '06/07/2018 – 09/07/2018', location: '巴黎' },
-      { role: '网页设计师（实习）', company: 'Galerie Pascal Vanhoecke', period: '04/2018 – 06/2018', location: '巴黎卡尚' },
-      { role: '印刷设计（实习）', company: '乐影文创', period: '03/2016 – 06/2016', location: '杭州余杭' },
-      { role: '文化调解员（志愿者）', company: '浙江美术馆', period: '06/2015 – 06/2016', location: '杭州' },
-      { role: '平面设计师（实习）', company: '智睿传媒', period: '12/2015 – 03/2016', location: '杭州' }
-    ]
-  };
-
   const education = {
     fr: [
       { degree: 'Mastère Spécialisé – Designer d\'Expérience Interactive et Ludique', school: 'GOBELINS, l\'école de l\'image', period: '10/2019 – 05/2021' },
-      { degree: 'DSAA – Design Graphique et Narration Multimédia', school: 'Lycée Jacques Prévert, Boulogne-Billancourt', period: '09/2017 – 06/2019' },
+      { degree: 'Diplôme Supérieur des Arts Appliqués (DSAA) – Design Graphique et Narration Multimédia', school: 'Lycée Jacques Prévert, Boulogne-Billancourt', period: '09/2017 – 06/2019' },
       { degree: 'Workshops d\'Artistes', school: 'E-ART campus, Hangzhou', period: '07/2016 – 07/2017' }, // 补充了这一段艺术工作坊经历
       { degree: 'Bachelor – Automatisation', school: 'Université des Sciences et Techniques du Zhejiang', period: '09/2012 – 06/2016' }
     ],
     en: [
       { degree: 'Specialized Master\'s – Interactive and Playful Experience Design', school: 'GOBELINS, l\'école de l\'image', period: '10/2019 – 05/2021' },
-      { degree: 'DSAA – Graphic Design and Multimedia Storytelling', school: 'Lycée Jacques Prévert, Boulogne-Billancourt', period: '09/2017 – 06/2019' },
+      { degree: 'Higher Diploma in Applied Arts (DSAA) – Graphic Design and Multimedia Storytelling', school: 'Lycée Jacques Prévert, Boulogne-Billancourt', period: '09/2017 – 06/2019' },
       { degree: 'Artist Workshops', school: 'E-ART campus, Hangzhou', period: '07/2016 – 07/2017' },
       { degree: 'Bachelor – Automation', school: 'Zhejiang Sci-Tech University', period: '09/2012 – 06/2016' }
     ],
     zh: [
       { degree: '专业硕士 – 交互式和趣味性体验设计', school: 'GOBELINS, l\'école de l\'image', period: '10/2019 – 05/2021' },
-      { degree: 'DSAA – 平面设计和多媒体叙事', school: 'Lycée Jacques Prévert, Boulogne-Billancourt', period: '09/2017 – 06/2019' },
+      { degree: '应用艺术高级文凭（DSAA） – 平面设计和多媒体叙事', school: 'Lycée Jacques Prévert, Boulogne-Billancourt', period: '09/2017 – 06/2019' },
       { degree: '艺术家工作坊经历', school: 'E-ART 杭州校区', period: '07/2016 – 07/2017' },
       { degree: '学士 – 自动化', school: '浙江理工大学', period: '09/2012 – 06/2016' }
     ]
@@ -131,9 +100,19 @@ const experience = {
     <div className="min-h-screen bg-[#f2f2f2]">
       <section className="pt-40 pb-20 px-8 md:px-12">
         <div className="max-w-[1400px] mx-auto">
-          <h1 className="text-5xl md:text-6xl tracking-tight mb-16">
-            {t('about.title', language)}
-          </h1>
+          <div className="mb-16 flex flex-col items-start gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <h1 className="text-5xl md:text-6xl tracking-tight">
+              {t('about.title', language)}
+            </h1>
+            <div className="flex flex-col items-start gap-2">
+              <a href={resumeDownload.path} download={resumeDownload.filename} type={resumeDownload.mimeType}
+                className="inline-flex min-h-12 items-center gap-3 border border-black/25 px-5 py-3 text-sm tracking-tight cursor-pointer hover:bg-black hover:text-white motion-safe:transition-colors motion-safe:duration-200 focus-visible:outline-2 focus-visible:outline-black focus-visible:outline-offset-4">
+                {t('about.downloadCv', language)}
+                <Download size={18} aria-hidden="true" />
+              </a>
+              <p className="text-xs text-black/50">{t('about.cvFormat', language)}</p>
+            </div>
+          </div>
 
           <div className="grid md:grid-cols-2 gap-16 md:gap-24">
             <div className="space-y-6">
@@ -177,19 +156,28 @@ const experience = {
               <h2 className="text-2xl tracking-tight mb-8">
                 {t('about.experienceTitle', language)}
               </h2>
-              <div className="space-y-6 text-black/70">
-                {experience[language].map((exp, index) => (
-                  <div key={index}>
-                    <p className="text-base tracking-tight font-medium text-black/90">
-                      {exp.role}
-                    </p>
-                    <p className="text-sm tracking-tight">
-                      {exp.company} {exp.location && `— ${exp.location}`}
-                    </p>
-                    <p className="text-xs tracking-tight text-black/50 mt-1">
-                      {exp.period}
-                    </p>
-                  </div>
+              <div className="space-y-10 text-black/70">
+                {resumeExperienceGroups.map((group) => (
+                  <section key={group.id} aria-labelledby={`experience-${group.id}`}>
+                    <h3 id={`experience-${group.id}`} className="text-sm tracking-wide uppercase text-black/60 mb-5">
+                      {t(group.titleKey, language)}
+                    </h3>
+                    <ol className="space-y-6">
+                      {group.entries.map((exp) => (
+                        <li key={exp.id} data-experience-id={exp.id}>
+                          <h4 style={{ fontFamily: 'inherit' }} className="text-base tracking-tight font-medium text-black/90">
+                            {exp.role[language]}
+                          </h4>
+                          <p className="text-sm tracking-tight [overflow-wrap:anywhere]">
+                            {exp.company[language]} — {exp.location[language]}
+                          </p>
+                          <p className="text-xs tracking-tight text-black/50 mt-1">
+                            {exp.period}
+                          </p>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
                 ))}
               </div>
             </div>

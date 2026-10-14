@@ -1,87 +1,80 @@
-import { Mail, Phone, Instagram, ExternalLink } from 'lucide-react';
+import { ArrowUpRight, Mail } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../i18n/translations';
+import { contactDetails } from '../data/contact';
+import '../../styles/contact.css';
 
 export function Contact() {
   const { language } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-[#f2f2f2] flex items-center justify-center">
-      <section className="px-8 md:px-12 py-32">
-        <div className="max-w-[900px] mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl tracking-tight mb-16">
-            {t('contact.title', language)}
-          </h1>
+    <div className="contact-page">
+      <section className="contact-content" aria-labelledby="contact-title">
+        <div className="contact-masthead">
+          <Mail size={18} strokeWidth={1.5} className="contact-masthead-icon" aria-hidden="true" />
+          <p className="contact-availability">{t('contact.availability', language)}</p>
+        </div>
 
-          <p className="text-xl md:text-2xl text-black/60 tracking-tight mb-20 max-w-2xl mx-auto">
-            {t('contact.description', language)}
-          </p>
+        <header className="contact-header">
+          <h1 id="contact-title" className="contact-title">{t('contact.title', language)}</h1>
+          <p className="contact-introduction">{t('contact.description', language)}</p>
+        </header>
 
-          <div className="space-y-12">
-            <div>
-              <p className="text-sm text-black/40 tracking-wide mb-4">
-                {t('contact.email', language)}
-              </p>
-              <a
-                href="mailto:zhongyuan5945@gmail.com"
-                className="inline-flex items-center gap-3 text-2xl md:text-3xl tracking-tight hover:opacity-60 transition-opacity"
-              >
-                <Mail size={28} />
-                zhongyuan5945@gmail.com
-              </a>
+        <div className="contact-grid">
+          <section className="contact-block contact-block-email" aria-labelledby="contact-email-heading">
+            <div className="contact-block-label">
+              <span className="contact-block-number" aria-hidden="true">01</span>
+              <h2 id="contact-email-heading">{t('contact.email', language)}</h2>
             </div>
+            <a href={`mailto:${contactDetails.email}`} className="contact-link contact-email-link">
+              <span className="contact-link-value">{contactDetails.email}</span>
+              <ArrowUpRight className="contact-link-arrow" size={24} aria-hidden="true" />
+            </a>
+          </section>
 
-            <div className="border-t border-black/10 pt-12">
-              <p className="text-sm text-black/40 tracking-wide mb-4">
-                {t('contact.phone', language)}
-              </p>
-              <a
-                href="tel:+33637510836"
-                className="inline-flex items-center gap-3 text-xl md:text-2xl tracking-tight hover:opacity-60 transition-opacity"
-              >
-                <Phone size={24} />
-                +33 6 37 51 08 36
-              </a>
+          <section className="contact-block contact-block-phone" aria-labelledby="contact-phone-heading">
+            <div className="contact-block-label">
+              <span className="contact-block-number" aria-hidden="true">02</span>
+              <h2 id="contact-phone-heading">{t('contact.phone', language)}</h2>
             </div>
+            <a href={`tel:${contactDetails.phoneNumber}`} className="contact-link contact-phone-link">
+              <span className="contact-link-value">{contactDetails.phoneDisplay}</span>
+              <ArrowUpRight className="contact-link-arrow" size={20} aria-hidden="true" />
+            </a>
+          </section>
 
-            <div className="border-t border-black/10 pt-12">
-              <p className="text-sm text-black/40 tracking-wide mb-6">
-                {t('contact.follow', language)}
-              </p>
-              <div className="flex justify-center gap-8">
-                <a
-                  href="https://www.instagram.com/zhongyuan5945"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-lg tracking-tight hover:opacity-60 transition-opacity"
-                >
-                  <Instagram size={22} />
-                  Instagram
+          <section className="contact-block contact-block-social" aria-labelledby="contact-social-heading">
+            <div className="contact-block-label">
+              <span className="contact-block-number" aria-hidden="true">03</span>
+              <h2 id="contact-social-heading">{t('contact.follow', language)}</h2>
+            </div>
+            <div className="contact-social-links">
+              {contactDetails.socialLinks.map((social) => (
+                <a key={social.id} href={social.href} target="_blank" rel="noopener noreferrer"
+                  className="contact-link contact-social-link" aria-label={`${social.label} — ${t('contact.opensInNewTab', language)}`}>
+                  <span className="contact-link-value">{social.label}</span>
+                  <ArrowUpRight className="contact-link-arrow" size={20} aria-hidden="true" />
                 </a>
-                <a
-                  href="https://www.linkedin.com/in/yuan-zhong-b1a3a7113/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-lg tracking-tight hover:opacity-60 transition-opacity"
-                >
-                  LinkedIn
-                </a>
+              ))}
+            </div>
+          </section>
+
+          <section className="contact-block contact-block-location" aria-labelledby="contact-location-heading">
+            <div className="contact-block-label">
+              <span className="contact-block-number" aria-hidden="true">04</span>
+              <h2 id="contact-location-heading">{t('contact.locationLabel', language)}</h2>
+            </div>
+            <address className="contact-address">
+              <p>{t('contact.location', language)}</p>
+              <p>{contactDetails.address}</p>
+            </address>
+            <dl className="contact-business">
+              <div>
+                <dt>SIRET</dt>
+                <dd>{contactDetails.siret}</dd>
               </div>
-            </div>
-          </div>
-
-          <div className="mt-24 pt-12 border-t border-black/10">
-            <p className="text-sm text-black/40 tracking-tight">
-              {t('contact.location', language)}
-              <br />
-              25 bis, rue du Château, 92200 Neuilly-sur-Seine
-              <br />
-              {t('contact.availability', language)}
-            </p>
-            <p className="text-xs text-black/30 tracking-tight mt-4">
-              SIRET: 903 578 938 00016
-            </p>
-          </div>
+            </dl>
+          </section>
         </div>
       </section>
     </div>

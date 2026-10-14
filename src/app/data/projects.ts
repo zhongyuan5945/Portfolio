@@ -11,6 +11,20 @@ export interface Shop {
     zh: string;
   };
   images: string[];
+  thumbnailImage?: string;
+}
+
+export interface GalleryGroup {
+  name: string;
+  images: string[];
+}
+
+export interface ProjectVideo {
+  kind: 'embed' | 'file';
+  src: string;
+  poster?: string;
+  title?: string;
+  placement?: 'before-gallery' | 'after-gallery';
 }
 
 export interface Project {
@@ -24,10 +38,13 @@ export interface Project {
   category: Category;
   subcategory?: string;
   coverImage: string;
+  thumbnailImage?: string;
   imageCount: number;
   images?: string[];
   placeholderImages?: string[];
   shops?: Shop[];
+  galleryGroups?: GalleryGroup[];
+  videos?: ProjectVideo[];
   videoUrl?: string;
   description: {
     fr: string;
@@ -36,7 +53,7 @@ export interface Project {
   };
 }
 
-import { projectImageUrls } from './projectImageData';
+import { projectImageUrls, dessinSubcategoryImages } from './projectImageData';
 import { impressionShops } from './impressionShops';
 
 const placeholderBaseUrls = [
@@ -165,7 +182,9 @@ function shopYearKey(year: string | undefined): number {
 }
 
 function createProject(project: Omit<Project, 'images' | 'placeholderImages'>): Project {
-  const actualImages = projectImageUrls[project.id];
+  const actualImages = project.galleryGroups
+    ? project.galleryGroups.flatMap((group) => group.images)
+    : projectImageUrls[project.id];
   const sortedShops = project.shops
     ? [...project.shops].sort((a, b) => shopYearKey(b.year) - shopYearKey(a.year))
     : undefined;
@@ -175,12 +194,8 @@ function createProject(project: Omit<Project, 'images' | 'placeholderImages'>): 
   let finalImageCount: number;
 
   if (shopImages.length > 0) {
-    // Shop-based projects (e.g. Impression): float a random shop image to
-    // position 0 so the cover / hero / listing thumbnail all reflect a real
-    // sub-page image instead of a generic placeholder.
-    const randomIndex = Math.floor(Math.random() * shopImages.length);
-    const randomImage = shopImages[randomIndex];
-    images = [randomImage, ...shopImages.filter((_, i) => i !== randomIndex)];
+    // Preserve each shop's gallery order; covers are selected separately.
+    images = shopImages;
     finalImageCount = shopImages.length;
   } else if (actualImages) {
     images = actualImages;
@@ -190,7 +205,7 @@ function createProject(project: Omit<Project, 'images' | 'placeholderImages'>): 
     finalImageCount = project.imageCount;
   }
 
-  const coverImage = images.length > 0 ? images[0] : getSampleCoverImage(project.id);
+  const coverImage = images.length > 0 ? images[0] : (project.coverImage || getSampleCoverImage(project.id));
 
   return {
     ...project,
@@ -266,6 +281,15 @@ const projectsData: Array<Omit<Project, 'images' | 'placeholderImages'>> = [
     category: 'projets-graphiques',
     coverImage: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=800&auto=format&fit=crop',
     imageCount: 8,
+    videos: [
+      {
+        kind: 'file',
+        placement: 'before-gallery',
+        src: 'https://ik.imagekit.io/ZHONGyuan/ZHONGyuan/Ephemere/Ephemeris_Lighter.m4v',
+        poster: 'https://ik.imagekit.io/ZHONGyuan/ZHONGyuan/Ephemere/50457_ephemeris_l_un_des8prototypesderealitevirtuelleetaugmenteepresen_original.jpg'
+      },
+      { kind: 'embed', src: 'https://www.youtube.com/embed/jVO16C3Nyf4', title: 'Éphémère — Fondation Louis Vuitton' }
+    ],
     description: {
       fr: 'Éphémère est une application interactive imaginée pour la Fondation Louis Vuitton, permettant aux visiteurs de laisser une trace poétique de leur passage à travers la création de constellations dans un ciel virtuel.\n\nChaque interaction génère une nouvelle composition lumineuse, transformant les présences individuelles en une cartographie collective et évolutive. Le projet interroge la mémoire des lieux, la trace numérique et la dimension éphémère de l’expérience muséale.',
     
@@ -458,6 +482,13 @@ const projectsData: Array<Omit<Project, 'images' | 'placeholderImages'>> = [
     category: 'arts-visuels',
     imageCount: 67,
     coverImage: 'https://ik.imagekit.io/ZHONGyuan/ZHONGyuan/Dessin/tree.png',
+    galleryGroups: [
+      'Bonne Année',
+      'Paysages',
+      'Personnages',
+      'Flou artistique',
+      'Peinture et calligraphie chinoises'
+    ].map((name) => ({ name, images: dessinSubcategoryImages[name] ?? [] })),
     description: {
       fr: 'Dessins',
       en: 'Drawings',
@@ -863,6 +894,16 @@ export function getProjectsByCategory(category: Category): Project[] {
   return projects
     .filter((p) => p.category === category && !p.subcategory)
     .sort(byYearDesc);
+}
+
+export function getAllProjectsByCategory(category: Category): Project[] {
+  return projects.filter((project) => project.category === category).sort(byYearDesc);
+}
+
+export function getProjectVideos(project: Project): ProjectVideo[] {
+  return project.videos ?? (project.videoUrl
+    ? [{ kind: 'embed', src: project.videoUrl, poster: project.coverImage }]
+    : []);
 }
 
 export function getPhotoSeries(): Project[] {

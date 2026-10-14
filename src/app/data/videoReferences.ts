@@ -6,6 +6,34 @@ export interface VideoReference {
   thumbnail: string;
   aspectRatio: number; // height/width ratio for masonry layout
   publishedAt: string;
+  description?: { fr: string; en: string; zh: string };
+}
+
+export function getSortedVideoReferences(): VideoReference[] {
+  return [...videoReferences].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+}
+
+export function getVideoReferenceById(id: string): VideoReference | undefined {
+  return videoReferences.find((video) => video.id === id);
+}
+
+export function getVideoEmbedUrl(video: VideoReference): string | undefined {
+  if (video.platform !== 'YouTube') return undefined;
+  try {
+    const url = new URL(video.url);
+    const id = url.hostname === 'youtu.be'
+      ? url.pathname.slice(1)
+      : url.pathname.startsWith('/shorts/')
+        ? url.pathname.split('/')[2]
+        : url.searchParams.get('v');
+    return id && /^[a-zA-Z0-9_-]{11}$/.test(id)
+      ? `https://www.youtube.com/embed/${id}`
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export const videoReferences: VideoReference[] = [

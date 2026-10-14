@@ -90,6 +90,32 @@ categories: {
       }
     }
   },
+  portfolio: {
+    viewProject: { fr: 'Voir le projet', en: 'View Project', zh: '查看项目' },
+    viewSeries: { fr: 'Voir la collection', en: 'View collection', zh: '查看完整系列' },
+    showMore: { fr: 'Afficher plus', en: 'Show more', zh: '显示更多' },
+    showLess: { fr: 'Afficher moins', en: 'Show less', zh: '收起' },
+    playVideo: { fr: 'Charger la vidéo', en: 'Load video', zh: '加载视频' },
+    viewSource: { fr: 'Voir la source', en: 'View source', zh: '查看来源' },
+    backToVideos: { fr: 'Retour aux vidéos', en: 'Back to videos', zh: '返回视频列表' },
+    viewAll: { fr: 'Tout afficher', en: 'View all', zh: '查看全部' },
+    collapseGallery: { fr: 'Réduire la galerie', en: 'Collapse gallery', zh: '收起画廊' },
+    previousItems: { fr: 'Œuvres précédentes', en: 'Previous items', zh: '上一组作品' },
+    nextItems: { fr: 'Œuvres suivantes', en: 'Next items', zh: '下一组作品' },
+    previousPage: { fr: 'Page précédente', en: 'Previous page', zh: '上一页' },
+    nextPage: { fr: 'Page suivante', en: 'Next page', zh: '下一页' },
+    choosePage: { fr: 'Choisir une page', en: 'Choose page', zh: '选择页码' },
+    videoPagination: { fr: 'Navigation des vidéos', en: 'Video pagination', zh: '视频分页导航' },
+    browseCategories: { fr: 'Explorer les catégories', en: 'Browse categories', zh: '浏览作品分类' },
+    independentProjects: { fr: 'Projets indépendants', en: 'Individual projects', zh: '独立项目' },
+    drawingAndComics: { fr: 'Dessin, illustration et bande dessinée', en: 'Drawing, illustration and comics', zh: '绘画、插画与漫画' },
+    works: { fr: 'œuvres', en: 'works', zh: '件作品' },
+    shops: { fr: 'commerces', en: 'shops', zh: '家店铺' },
+    series: { fr: 'séries', en: 'series', zh: '个系列' },
+    videos: { fr: 'vidéos', en: 'videos', zh: '条视频' },
+    closeVideo: { fr: 'Fermer la vidéo', en: 'Close video', zh: '关闭视频' },
+    videoUnavailable: { fr: 'Cette vidéo est indisponible.', en: 'This video is unavailable.', zh: '此视频暂时无法播放。' }
+  },
   work: {
     title: {
       fr: 'Travaux',
@@ -168,9 +194,9 @@ categories: {
       zh: '从事结合视觉识别、编辑、插画、视频和印刷材料的项目。对图形系统、实验性图像以及设计与视觉文化之间的混合形式特别感兴趣。'
     },
     bio3: {
-      fr: 'Diplômé de GOBELINS avec un Mastère Spécialisé en Design d\'Expérience Interactive et Ludique, et du Lycée Jacques Prévert avec un DSAA en Design Graphique et Narration Multimédia.',
-      en: 'Graduate from GOBELINS with a Specialized Master\'s in Interactive and Playful Experience Design, and from Lycée Jacques Prévert with a DSAA in Graphic Design and Multimedia Storytelling.',
-      zh: '毕业于 GOBELINS，获得交互式和趣味性体验设计专业硕士学位，以及 Lycée Jacques Prévert 的图形设计和多媒体叙事高级文凭。'
+      fr: 'Diplômé de GOBELINS avec un Mastère Spécialisé en Design d\'Expérience Interactive et Ludique, et du Lycée Jacques Prévert avec un Diplôme Supérieur des Arts Appliqués (DSAA) en Design Graphique et Narration Multimédia.',
+      en: 'Graduate from GOBELINS with a Specialized Master\'s in Interactive and Playful Experience Design, and from Lycée Jacques Prévert with a Higher Diploma in Applied Arts (DSAA) in Graphic Design and Multimedia Storytelling.',
+      zh: '毕业于 GOBELINS，获得交互式和趣味性体验设计专业硕士学位，以及 Lycée Jacques Prévert 的应用艺术高级文凭（DSAA），专攻平面设计和多媒体叙事。'
     },
     bio4: {
       fr: 'Expérience de travail avec des studios de design, agences de branding, et projets culturels à Paris et Hangzhou.',
@@ -187,6 +213,11 @@ categories: {
       en: 'Professional Experience',
       zh: '工作经验'
     },
+    freelanceTitle: { fr: 'Freelance', en: 'Freelance', zh: '自由职业经历' },
+    internshipsTitle: { fr: 'Stages', en: 'Internships', zh: '实习经历' },
+    volunteeringTitle: { fr: 'Volontariat', en: 'Volunteering', zh: '志愿经历' },
+    downloadCv: { fr: 'Télécharger le CV', en: 'Download CV', zh: '下载简历' },
+    cvFormat: { fr: 'PDF · Français', en: 'PDF · French', zh: 'PDF · 法语' },
     educationTitle: {
       fr: 'Formation',
       en: 'Education',
@@ -224,6 +255,8 @@ categories: {
       en: 'Follow',
       zh: '关注'
     },
+    locationLabel: { fr: 'Localisation', en: 'Location', zh: '所在地' },
+    opensInNewTab: { fr: 'Ouvre un nouvel onglet', en: 'Opens in a new tab', zh: '在新标签页打开' },
     location: {
       fr: 'Basé à Neuilly-sur-Seine, France',
       en: 'Based in Neuilly-sur-Seine, France',

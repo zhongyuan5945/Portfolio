@@ -1,16 +1,9 @@
-import { Outlet, useLocation } from 'react-router';
+import { Outlet, ScrollRestoration } from 'react-router';
 import { Navigation } from './components/Navigation';
 import { useLanguage } from './contexts/LanguageContext';
-import { useEffect } from 'react';
 
 export function Root() {
-  const location = useLocation();
   const { language } = useLanguage();
-
-  // Scroll to top on route change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
 
   const footerText = {
     rights: {
@@ -28,7 +21,8 @@ export function Root() {
   return (
     <div className="min-h-screen bg-[#f2f2f2]" lang={language}>
       <Navigation />
-      <Outlet />
+      <main><Outlet /></main>
+      <ScrollRestoration />
 
       {/* Footer */}
       <footer className="border-t border-black/10 py-12 px-8 md:px-12">

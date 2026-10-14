@@ -1,69 +1,51 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router';
-import { videoReferences } from '../data/videoReferences';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
+import { videoReferences, getVideoEmbedUrl, getVideoReferenceById, type VideoReference } from '../data/videoReferences';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../i18n/translations';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
+import { X } from 'lucide-react';
+import { ProjectCarousel } from '../components/ProjectCarousel';
+import { VideoPlayer } from '../components/VideoPlayer';
+import { getPortfolioGroups } from '../data/portfolio';
+import { useVideoTitle } from '../hooks/useVideoTitle';
+import { PortfolioReturnLink } from '../components/PortfolioReturnLink';
+
+function SelectedVideo({ video, close }: { video: VideoReference; close: () => void }) {
+  const { language } = useLanguage();
+  const title = useVideoTitle(video) ?? video.title;
+  const embedUrl = getVideoEmbedUrl(video);
+  return (
+    <section id="video-player" className="px-8 md:px-12 pb-12 scroll-mt-32" aria-labelledby="selected-video-title">
+      <div className="max-w-[1600px] mx-auto border border-black/15 bg-white p-4 md:p-8">
+        <header className="flex items-start justify-between gap-4 mb-6">
+          <div>
+            <p className="text-xs text-black/55 mb-2">{video.platform} · {video.publishedAt.slice(0, 10)}</p>
+            <h2 id="selected-video-title" className="text-xl md:text-3xl tracking-tight [overflow-wrap:anywhere]">{title}</h2>
+          </div>
+          <button type="button" onClick={close} aria-label={t('portfolio.closeVideo', language)} className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border border-black/20 hover:border-black focus-visible:outline-2 focus-visible:outline-black focus-visible:outline-offset-4">
+            <X size={20} aria-hidden="true" />
+          </button>
+        </header>
+        {embedUrl
+          ? <VideoPlayer video={{ kind: 'embed', src: embedUrl, poster: video.thumbnail }} title={title} active />
+          : <p className="text-sm text-black/70">{t('portfolio.videoUnavailable', language)}</p>}
+        {video.description?.[language] && <p className="mt-6 max-w-3xl text-base text-black/85 whitespace-pre-line">{video.description[language]}</p>}
+      </div>
+    </section>
+  );
+}
 
 export function VideoReferences() {
   const { language } = useLanguage();
-  const [youtubeTitles, setYoutubeTitles] = useState<Record<string, string>>({});
-
-  const sortedVideoReferences = useMemo(
-    () =>
-      [...videoReferences].sort(
-        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-      ),
-    [videoReferences]
-  );
-
-  useEffect(() => {
-    const youtubeVideos = videoReferences.filter((video) => video.platform === 'YouTube');
-    if (youtubeVideos.length === 0) return;
-
-    let active = true;
-
-    const fetchTitles = async () => {
-      const results = await Promise.all(
-        youtubeVideos.map(async (video) => {
-          try {
-            const response = await fetch(
-              `https://www.youtube.com/oembed?url=${encodeURIComponent(video.url)}&format=json`
-            );
-            if (!response.ok) return { id: video.id, title: video.title };
-            const data = await response.json();
-            return { id: video.id, title: data.title ?? video.title };
-          } catch {
-            return { id: video.id, title: video.title };
-          }
-        })
-      );
-
-      if (active) {
-        setYoutubeTitles(results.reduce((acc, result) => ({ ...acc, [result.id]: result.title }), {}));
-      }
-    };
-
-    fetchTitles();
-
-    return () => {
-      active = false;
-    };
-}, [videoReferences]);
-
-  const getPlatformColor = (platform: string) => {
-    switch (platform) {
-      case 'TikTok':
-        return 'bg-black text-white';
-      case 'YouTube':
-        return 'bg-red-600 text-white';
-      case 'Instagram':
-        return 'bg-purple-600 text-white';
-      default:
-        return 'bg-gray-800 text-white';
-    }
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const selectedVideo = getVideoReferenceById(params.get('video') ?? '');
+  const group = getPortfolioGroups('creations-video')[0];
+  const closeVideo = () => {
+    const next = new URLSearchParams(params);
+    if (selectedVideo) next.set('gallery_creations-video', selectedVideo.id);
+    next.delete('video');
+    navigate(`/video-references${next.size ? `?${next}` : ''}#creations-video`, { replace: true, state: location.state });
   };
 
   return (
@@ -71,13 +53,7 @@ export function VideoReferences() {
       {/* Back Button */}
       <section className="pt-32 px-8 md:px-12">
         <div className="max-w-[1600px] mx-auto">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-black/50 hover:text-black transition-colors mb-12"
-          >
-            <ArrowLeft size={20} />
-            <span className="text-sm tracking-wide">{t('work.backToHome', language)}</span>
-          </Link>
+          <div className="mb-12"><PortfolioReturnLink category="creations-video" /></div>
         </div>
       </section>
 
@@ -87,7 +63,7 @@ export function VideoReferences() {
           <h1 className="text-5xl md:text-7xl tracking-tight mb-6">
             {t('videoReferences.title', language)}
           </h1>
-          <p className="text-lg md:text-xl text-black/60 tracking-tight max-w-2xl mb-4">
+          <p className="text-lg md:text-xl text-black/60 tracking-tight max-w-2xl mb-4 whitespace-pre-line">
             {t('videoReferences.description', language)}
           </p>
           <p className="text-sm text-black/40 tracking-tight">
@@ -96,48 +72,14 @@ export function VideoReferences() {
         </div>
       </section>
 
-      {/* Masonry Grid */}
-      <section className="px-8 md:px-12 pb-32">
+      {selectedVideo && <SelectedVideo key={selectedVideo.id} video={selectedVideo} close={closeVideo} />}
+
+      {/* Only the selected video creates a player; the gallery stays static. */}
+      <section id="creations-video" className="px-8 md:px-12 pb-32 scroll-mt-32">
         <div className="max-w-[1600px] mx-auto">
-          <ResponsiveMasonry columnsCountBreakPoints={{ 350: 1, 768: 2, 1024: 3 }}>
-          <Masonry gutter="16px">
-            {sortedVideoReferences.map((video) => (
-              <a
-                key={video.id}
-                href={video.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group block bg-white overflow-hidden"
-              >
-                <div className="relative">
-                  <ImageWithFallback
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <ExternalLink size={32} className="text-white" />
-                    </div>
-                  </div>
-
-                  {/* Platform Badge */}
-                  <div className={`absolute top-3 left-3 px-3 py-1 ${getPlatformColor(video.platform)} text-xs tracking-wide`}>
-                    {video.platform}
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <p className="text-sm tracking-tight group-hover:opacity-60 transition-opacity">
-                    {video.platform === 'YouTube' ? youtubeTitles[video.id] ?? video.title : video.title}
-                  </p>
-                </div>
-              </a>
-            ))}
-          </Masonry>
-          </ResponsiveMasonry>
+          <div className="border border-black/15 bg-white/60 p-4 md:p-8">
+            <ProjectCarousel group={group} category="creations-video" thumbnailsOnly />
+          </div>
         </div>
       </section>
     </div>

@@ -1,38 +1,33 @@
-import { useParams, Link } from 'react-router';
-import { getProjectById, getProjectImagePlaceholders, getProjectImages, getProjectsByCategory, getPhotoSeries } from '../data/projects';
-import { dessinSubcategoryImages } from '../data/projectImageData';
+import { useParams, Link, useLocation, useSearchParams } from 'react-router';
+import { getProjectById, getProjectImagePlaceholders, getProjectImages, getProjectsByCategory, getPhotoSeries, getProjectVideos, type Project } from '../data/projects';
+import { getProjectThumbnail } from '../data/portfolio';
+import { getThumbnailUrl } from '../data/media';
+import { VideoPlayer } from '../components/VideoPlayer';
+import { PortfolioReturnLink } from '../components/PortfolioReturnLink';
+import { NotFound } from './NotFound';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../i18n/translations';
 import { ArrowLeft } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import Masonry from 'react-responsive-masonry';
+import { GalleryMasonry as Masonry } from '../components/GalleryMasonry';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 
 export function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
-  const { language } = useLanguage();
   const project = getProjectById(id || '');
-  // Debug: log loaded project to verify fields come from projects.ts
-  // Remove this after debugging
-  // eslint-disable-next-line no-console
-  console.log('[debug] ProjectDetail loaded project:', project);
+  if (!project) return <NotFound />;
+  return <ProjectDetailContent key={project.id} project={project} />;
+}
+
+function ProjectDetailContent({ project }: { project: Project }) {
+  const { language } = useLanguage();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-[#f2f2f2] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-2xl mb-8">{t('notFound.title', language)}</p>
-          <Link to="/" className="text-black/60 hover:text-black transition-colors">
-            {t('work.backToHome', language)}
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const [activeVideo, setActiveVideo] = useState<string>();
 
   const images = getProjectImages(project);
   const placeholderImages = getProjectImagePlaceholders(project);
@@ -53,10 +48,17 @@ export function ProjectDetail() {
   const isMasonry = imageCount > 8 && imageCount <= 25; // Medium projects
   const isDense = imageCount > 25 && imageCount <= 50; // Large projects
   const isMuseum = imageCount > 50; // Very large projects
-  const isDessin = project.id === 'dessin';
+  const isDessin = Boolean(project.galleryGroups?.length);
+  const projectVideos = getProjectVideos(project);
 
   const hasShops = !!project.shops && project.shops.length > 0;
-  const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
+  const selectedShopId = searchParams.get('shop');
+  const setSelectedShopId = (shopId: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (shopId) next.set('shop', shopId);
+    else next.delete('shop');
+    setSearchParams(next, { preventScrollReset: true, state: location.state });
+  };
   const selectedShop = hasShops
     ? project.shops!.find((s) => s.id === selectedShopId) ?? null
     : null;
@@ -65,59 +67,33 @@ export function ProjectDetail() {
   // When a shop is opened, scroll its detail panel into view so the user
   // doesn't have to hunt for the expansion.
   useEffect(() => {
+    setLightboxOpen(false);
+    setLightboxIndex(0);
     if (selectedShopId && panelRef.current) {
-      panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const frame = requestAnimationFrame(() => {
+        panelRef.current?.scrollIntoView({
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          block: 'start'
+        });
+      });
+      return () => cancelAnimationFrame(frame);
     }
   }, [selectedShopId]);
 
-  // Pick one random thumbnail per shop. Re-randomizes when the project changes.
+  // Stable thumbnails make shops recognizable across the homepage and details.
   const shopThumbnails = useMemo(() => {
     if (!project.shops) return [];
     return project.shops.map((shop) =>
-      shop.images.length > 0
-        ? shop.images[Math.floor(Math.random() * shop.images.length)]
-        : null
+      shop.thumbnailImage ?? shop.images[0] ?? null
     );
   }, [project.shops]);
 
-  const dessinSubcategoryNames = [
-    'Bonne Année',
-    'Paysages',
-    'Personnages',
-    'Flou artistique',
-    'Peinture et calligraphie chinoises'
-  ];
-
-  const dessinSubcategories = useMemo(() => {
-    if (!isDessin) return [];
-    return dessinSubcategoryNames.map((name) => ({
-      name,
-      images: dessinSubcategoryImages[name] || []
-    }));
-  }, [isDessin]);
-
-  // For Dessin project, randomly select cover and hero images from subcategories
-  const dessinAllImages = useMemo(() => {
-    if (!isDessin) return [];
-    return dessinSubcategoryNames.flatMap((name) => dessinSubcategoryImages[name] || []);
-  }, [isDessin]);
-
-  const randomDessinImage = useMemo(() => {
-    if (!isDessin || dessinAllImages.length === 0) return null;
-    return dessinAllImages[Math.floor(Math.random() * dessinAllImages.length)];
-  }, [isDessin, dessinAllImages]);
-
-  const randomDessinCoverImage = useMemo(() => {
-    if (!isDessin || dessinAllImages.length === 0) return null;
-    return dessinAllImages[Math.floor(Math.random() * dessinAllImages.length)];
-  }, [isDessin, dessinAllImages]);
+  const dessinSubcategories = project.galleryGroups ?? [];
 
   const galleryGutter = project.id === 'fragment' ? '1rem' : '0.75rem';
   const gallerySectionSpacing = project.id === 'fragment' ? 'space-y-8' : 'space-y-20';
 
-  // Use random images for Dessin, or default to project images
-  const heroImage = randomDessinImage ?? (images[0] ?? project.coverImage);
-  const projectCoverImage = randomDessinCoverImage ?? (project.coverImage ?? '');
+  const heroImage = images[0] ?? project.coverImage;
 
   // Lightbox slides: when a shop is selected, scope to that shop only;
   // otherwise fall back to the standard project images.
@@ -147,10 +123,11 @@ export function ProjectDetail() {
     <div className="min-h-screen bg-[#f2f2f2]">
       {/* Back Button */}
       <section className="pt-32 px-8 md:px-12">
-        <div className="max-w-[1600px] mx-auto">
+        <div className="max-w-[1600px] mx-auto flex flex-wrap items-center gap-x-8 mb-12">
+          <PortfolioReturnLink category={project.category} />
           <Link
             to={backPath}
-            className="inline-flex items-center gap-2 text-black/50 hover:text-black transition-colors mb-12"
+            className="inline-flex min-h-11 items-center gap-2 text-black/50 hover:text-black transition-colors"
           >
             <ArrowLeft size={20} />
             <span className="text-sm tracking-wide">
@@ -225,21 +202,11 @@ export function ProjectDetail() {
         </div>
       </section>
 
-      {/* Ephemere project videos */}
-      {project.id === 'ephemere' && (
-        <section className="px-8 md:px-12 pb-20">
-          <div className="max-w-[1600px] mx-auto">
-            <video
-              controls
-              playsInline
-              preload="metadata"
-              poster="https://ik.imagekit.io/ZHONGyuan/ZHONGyuan/Ephemere/50457_ephemeris_l_un_des8prototypesderealitevirtuelleetaugmenteepresen_original.jpg"
-              src="https://ik.imagekit.io/ZHONGyuan/ZHONGyuan/Ephemere/Ephemeris_Lighter.m4v"
-              className="w-full h-auto rounded-[1.5rem] bg-black"
-            />
-          </div>
+      {projectVideos.filter((video) => video.placement === 'before-gallery').map((video) => (
+        <section key={video.src} className="px-8 md:px-12 pb-20">
+          <div className="max-w-[1600px] mx-auto"><VideoPlayer video={video} title={projectTitle} active={activeVideo === video.src} onActivate={() => setActiveVideo(video.src)} /></div>
         </section>
-      )}
+      ))}
 
       {/* Shops grid — square thumbnail per shop; clicked shop inlines its detail panel below its row */}
       {hasShops && (
@@ -253,7 +220,7 @@ export function ProjectDetail() {
                   <Fragment key={shop.id}>
                     <button
                       onClick={() => setSelectedShopId(isSelected ? null : shop.id)}
-                      className={`relative aspect-square w-full overflow-hidden rounded-md bg-black/5 group focus:outline-none focus:ring-2 focus:ring-black/40 ${
+                      className={`relative aspect-square w-full cursor-pointer overflow-hidden rounded-md bg-black/5 group focus-visible:outline-2 focus-visible:outline-black focus-visible:outline-offset-4 ${
                         isSelected ? 'ring-2 ring-black' : ''
                       }`}
                       aria-label={shop.name}
@@ -261,7 +228,7 @@ export function ProjectDetail() {
                     >
                       {thumb ? (
                         <ImageWithFallback
-                          src={thumb}
+                          src={getThumbnailUrl(thumb, 400)}
                           alt={shop.name}
                           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
@@ -271,8 +238,8 @@ export function ProjectDetail() {
                           {shop.name}
                         </div>
                       )}
-                      <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
-                      <div className={`absolute inset-x-0 bottom-0 p-3 transition-opacity duration-300 text-left ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0" />
+                      <div className="absolute inset-x-0 bottom-0 p-3 text-left">
                         <p className="text-white text-sm tracking-wide leading-tight">
                           {shop.name}
                         </p>
@@ -287,7 +254,7 @@ export function ProjectDetail() {
                     {isSelected && (
                       <div
                         ref={panelRef}
-                        className="col-span-full bg-black/[0.03] rounded-lg p-6 md:p-10 mt-2 mb-4"
+                        className="col-span-full scroll-mt-32 bg-black/[0.03] rounded-lg p-6 md:p-10 mt-2 mb-4"
                       >
                         <article className="space-y-8">
                           <header className="max-w-3xl flex items-start justify-between gap-6">
@@ -414,6 +381,8 @@ export function ProjectDetail() {
                         placeholderSrc={placeholderImages[index]}
                         alt={`${projectTitle} - ${index + 1}`}
                         className="w-full h-auto transition-opacity duration-300 group-hover:opacity-80"
+                        loading="lazy"
+                        decoding="async"
                       />
                   </button>
                   {project.id === 'ephemere' && index === 2 && (
@@ -443,6 +412,8 @@ export function ProjectDetail() {
                       placeholderSrc={placeholderImages[index]}
                       alt={`${projectTitle} - ${index + 1}`}
                       className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
                     />
                 </button>
               ))}
@@ -512,45 +483,18 @@ export function ProjectDetail() {
       </section>
       )}
 
-      {project.videoUrl && project.id !== 'ephemere' && (
-        <section className="px-8 md:px-12 pb-32">
-          <div className="max-w-[1600px] mx-auto">
-            <div className="relative w-full overflow-hidden rounded-[1.5rem] bg-black" style={{ paddingTop: '56.25%' }}>
-              <iframe
-                src={project.videoUrl}
-                title={`${projectTitle} video`}
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              />
-            </div>
-          </div>
+      {projectVideos.filter((video) => video.placement !== 'before-gallery').map((video) => (
+        <section key={video.src} className="px-8 md:px-12 pb-32">
+          <div className="max-w-[1600px] mx-auto"><VideoPlayer video={video} title={projectTitle} active={activeVideo === video.src} onActivate={() => setActiveVideo(video.src)} /></div>
         </section>
-      )}
-
-      {/* Ephemere YouTube video (after gallery) */}
-      {project.id === 'ephemere' && (
-        <section className="px-8 md:px-12 pb-32">
-          <div className="max-w-[1600px] mx-auto">
-            <div className="relative w-full overflow-hidden rounded-[1.5rem] bg-black" style={{ paddingTop: '56.25%' }}>
-              <iframe
-                src="https://www.youtube.com/embed/jVO16C3Nyf4"
-                title="Éphémère — Fondation Louis Vuitton"
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        </section>
-      )}
+      ))}
 
       {/* Navigation */}
       <section className="px-8 md:px-12 pb-32">
         <div className="max-w-[1600px] mx-auto">
           {/* Back to Category */}
-          <div className="border-t border-black/10 pt-12 pb-8">
+          <div className="border-t border-black/10 pt-12 pb-8 flex flex-wrap items-center gap-x-8">
+            <PortfolioReturnLink category={project.category} />
             <Link
               to={backPath}
               className="inline-flex items-center gap-2 text-black/50 hover:text-black transition-colors"
@@ -578,13 +522,13 @@ export function ProjectDetail() {
                 {/* Previous Project */}
                 <div>
                   {prevProject ? (
-                    <Link to={`/project/${prevProject.id}`} className="group block">
+                    <Link to={`/project/${prevProject.id}`} state={location.state} className="group block">
                       <p className="text-sm text-black/40 tracking-wide mb-4">
                         ← {language === 'fr' ? 'Projet précédent' : language === 'en' ? 'Previous project' : '上一个项目'}
                       </p>
                       <div className="relative aspect-[4/3] bg-white overflow-hidden mb-4">
                         <ImageWithFallback
-                          src={prevProject.coverImage}
+                          src={getProjectThumbnail(prevProject)}
                           alt={prevProject.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
@@ -607,13 +551,13 @@ export function ProjectDetail() {
                 {/* Next Project */}
                 <div>
                   {nextProject ? (
-                    <Link to={`/project/${nextProject.id}`} className="group block">
+                    <Link to={`/project/${nextProject.id}`} state={location.state} className="group block">
                       <p className="text-sm text-black/40 tracking-wide mb-4 text-right">
                         {language === 'fr' ? 'Projet suivant' : language === 'en' ? 'Next project' : '下一个项目'} →
                       </p>
                       <div className="relative aspect-[4/3] bg-white overflow-hidden mb-4">
                         <ImageWithFallback
-                          src={nextProject.coverImage}
+                          src={getProjectThumbnail(nextProject)}
                           alt={nextProject.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
